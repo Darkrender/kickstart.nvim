@@ -793,7 +793,32 @@ require('lazy').setup({
   { 'tpope/vim-fugitive', event = 'VimEnter' },
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { -- dap, mostly for c/++ where constant debugging is super important
+    'mfussenegger/nvim-dap',
+    event = 'vimenter',
+    config = function()
+      local dap = require 'dap'
 
+      dap.adapters.gdb = {
+        type = 'executable',
+        command = 'gdb',
+        args = { '-i', 'dap' },
+      }
+
+      dap.configurations.c = {
+        {
+          name = 'Launch',
+          type = 'gdb',
+          request = 'launch',
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopAtBeginningOfMainSubprogram = false,
+        },
+      }
+    end,
+  },
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -835,7 +860,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
